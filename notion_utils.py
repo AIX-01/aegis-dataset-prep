@@ -26,49 +26,58 @@ class NotionTableReader:
         if not self.database_id:
             raise ValueError("Notion database ID is required")
 
-        self.client = Client(auth=self.api_key)
+        self.client = Client(auth=self.api_key, notion_version="2022-06-28")
 
-    def query_database_backup(
-        self,
-        filter_dict: Optional[Dict] = None,
-        sorts: Optional[List[Dict]] = None
-    ) -> List[Dict[str, Any]]:
+    def query_database(self, **query_params) -> List[Dict[str, Any]]:
         """
-        Query Notion database with optional filters and sorts
-
-        Args:
-            filter_dict: Notion filter object
-            sorts: List of sort objects
+        Query Notion database and return results
 
         Returns:
-            List of database rows
+            List of page objects from the database
         """
-        query_params = {"database_id": self.database_id}
-
-        if filter_dict:
-            query_params["filter"] = filter_dict
-        if sorts:
-            query_params["sorts"] = sorts
-
         try:
-            response = self.client.databases.query(**query_params)
-            return response.get("results", [])
-        except Exception as e:
-            print(f"Error querying Notion database: {e}")
-            raise
+            all_results = []
+            has_more = True
+            start_cursor = None
 
-    # notion_utils.py 파일 내 NotionTableReader 클래스 안에 있는 query_database 메서드 교체 코드
-    # 이 코드를 복사하여 notion_utils.py 파일에 붙여넣어 주세요.
-    def query_database(self, **query_params):
-        try:
-            # FIX: database_id를 query 메서드에 명시적으로 전달합니다.
-            # 이전에 발생한 AttributeError는 database_id가 암묵적으로 누락되었을 때
-            # 발생하는 예상치 못한 오류일 수 있습니다.
-            response = self.client.databases.query(database_id=self.database_id, **query_params)
-            return response
+            while has_more:
+                params = {"database_id": self.database_id, **query_params}
+                if start_cursor:
+                    params["start_cursor"] = start_cursor
+
+                response = self.client.databases.query(**params)
+                all_results.extend(response.get("results", []))
+
+                has_more = response.get("has_more", False)
+                start_cursor = response.get("next_cursor")
+
+            return all_results
+        except AttributeError as e:
+            # Fallback: try using POST request directly if method doesn't exist
+            print(f"AttributeError: {e}. Trying alternative approach...")
+            try:
+                import requests
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json",
+                    "Notion-Version": "2022-06-28"
+                }
+                url = f"https://api.notion.com/v1/databases/{self.database_id}/query"
+                response = requests.post(url, headers=headers, json=query_params)
+                response.raise_for_status()
+                data = response.json()
+                results = data.get("results", [])
+                # Debug: print first result to see structure
+                if results:
+                    print(f"[DEBUG] First result keys: {results[0].keys()}")
+                    print(f"[DEBUG] First result properties: {results[0].get('properties', {})}")
+                return results
+            except Exception as inner_e:
+                print(f"Fallback also failed: {inner_e}")
+                return []
         except Exception as e:
             print(f"Error querying Notion database with ID {self.database_id}: {e}")
-            return None
+            return []
 
     def get_property_value(self, page: Dict, property_name: str) -> Any:
         """
@@ -181,13 +190,29 @@ class NotionTableReader:
         """
         return self.get_all_rows(property_names=column_names)
 
+    def retrieve_database(self) -> Dict[str, Any]:
+        """
+        Retrieve database metadata
+
+        Returns:
+            Database metadata dictionary
+        """
+        try:
+            return self.client.databases.retrieve(database_id=self.database_id)
+        except Exception as e:
+            print(f"Error retrieving database: {e}")
+            return {}
+
     def print_database_schema(self):
         """Print database schema information"""
         try:
-            database = self.client.databases.retrieve(database_id=self.database_id)
+            database = self.retrieve_database()
             properties = database.get("properties", {})
 
-            print(f"Database: {database.get('title', [{}])[0].get('plain_text', 'Untitled')}")
+            title_list = database.get('title', [])
+            db_title = title_list[0].get('plain_text', 'Untitled') if title_list else 'Untitled'
+
+            print(f"Database: {db_title}")
             print(f"Database ID: {self.database_id}")
             print("\nProperties:")
             print("-" * 60)

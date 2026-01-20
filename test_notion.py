@@ -48,15 +48,14 @@ def test_database_schema(reader: NotionTableReader):
 
 
 def test_read_specific_columns(reader: NotionTableReader):
-    """Test reading "분류" and "특이사항" columns"""
+    """Test reading suspicious_start and suspicious_end columns"""
     print("\n" + "="*60)
-    print('Test 3: Reading "분류" and "특이사항" Columns')
+    print('Test 3: Reading "suspicious_start" and "suspicious_end" Columns')
     print("="*60)
 
     try:
         # Read specific columns
-        # column_names = ["분류", "특이사항"]
-        column_names = ["suspicious_start", "suspicious_end"]
+        column_names = ["suspicious_start", "suspicious_end", "filename"]
         rows = reader.get_columns(column_names)
 
         print(f"\n총 {len(rows)}개의 행을 읽어왔습니다.\n")
@@ -65,19 +64,25 @@ def test_read_specific_columns(reader: NotionTableReader):
             print("⚠️  데이터베이스가 비어있습니다.")
             return True
 
+        # Filter rows that have data
+        rows_with_data = [r for r in rows if r.get("filename") or r.get("suspicious_start") is not None]
+        print(f"데이터가 있는 행: {len(rows_with_data)}개\n")
+
         # Display results
         print("-" * 60)
-        for i, row in enumerate(rows[:10], 1):  # Show first 10 rows
-            분류 = row.get("분류", "N/A")
-            특이사항 = row.get("특이사항", "N/A")
+        for i, row in enumerate(rows_with_data[:10], 1):
+            filename = row.get("filename", "N/A")
+            suspicious_start = row.get("suspicious_start", "N/A")
+            suspicious_end = row.get("suspicious_end", "N/A")
 
             print(f"Row {i}:")
-            print(f"  분류: {분류}")
-            print(f"  특이사항: {특이사항}")
+            print(f"  filename: {filename}")
+            print(f"  suspicious_start: {suspicious_start}")
+            print(f"  suspicious_end: {suspicious_end}")
             print("-" * 60)
 
-        if len(rows) > 10:
-            print(f"... and {len(rows) - 10} more rows")
+        if len(rows_with_data) > 10:
+            print(f"... and {len(rows_with_data) - 10} more rows")
 
         print(f"\n✅ Successfully read {len(rows)} rows")
         return True
@@ -100,13 +105,19 @@ def test_read_all_data(reader: NotionTableReader):
 
         print(f"\n총 {len(rows)}개의 행을 읽어왔습니다.")
 
-        if rows:
-            print("\nFirst row sample:")
-            first_row = rows[0]
-            for key, value in first_row.items():
-                # Skip internal fields for cleaner output
-                if not key.startswith("_"):
-                    print(f"  {key}: {value}")
+        # Filter rows that have actual data (filename is not empty)
+        rows_with_data = [r for r in rows if r.get("filename")]
+        print(f"데이터가 있는 행: {len(rows_with_data)}개")
+
+        if rows_with_data:
+            print("\n--- 데이터가 있는 행들 ---")
+            for i, row in enumerate(rows_with_data, 1):
+                print(f"\nRow {i}:")
+                for key, value in row.items():
+                    # Skip internal fields for cleaner output
+                    if not key.startswith("_"):
+                        print(f"  {key}: {value}")
+                print("-" * 40)
 
         print(f"\n✅ Successfully read all data")
         return True
