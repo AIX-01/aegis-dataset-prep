@@ -1,4 +1,4 @@
-"""Optional plotting helpers for notebook evaluation."""
+"""Notebook 평가용 optional plotting helper."""
 
 from __future__ import annotations
 

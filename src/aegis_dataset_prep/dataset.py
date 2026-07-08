@@ -1,4 +1,4 @@
-"""Dataset split and label-count helpers."""
+"""Dataset split과 label count helper."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ DEFAULT_TEST_SIZE = 150
 
 
 def split_train_test(dataset: Mapping[str, Any], seed: int = DEFAULT_SPLIT_SEED, test_size: int = DEFAULT_TEST_SIZE):
-    """Reproduce the legacy train/test split recipe."""
+    """legacy train/test split recipe를 재현합니다."""
 
     from datasets import DatasetDict
 

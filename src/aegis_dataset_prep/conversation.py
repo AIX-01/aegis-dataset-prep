@@ -1,4 +1,4 @@
-"""Dataset-to-chat conversion helpers."""
+"""Dataset sample을 chat 형식으로 변환하는 helper."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Parsing and metric helpers for incident-classifier outputs."""
+"""Incident classifier output parsing과 metric helper."""
 
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ def labels_with_unknown(true_labels: Iterable[str], pred_labels: Iterable[str], 
 
 def accuracy(true_labels: Sequence[str], pred_labels: Sequence[str]) -> float:
     if len(true_labels) != len(pred_labels):
-        raise ValueError("true_labels and pred_labels must have the same length.")
+        raise ValueError("true_labels와 pred_labels의 길이가 같아야 합니다.")
     if not true_labels:
         return 0.0
     return sum(true == pred for true, pred in zip(true_labels, pred_labels)) / len(true_labels)
@@ -71,7 +71,7 @@ def classification_metrics(
     labels: Sequence[str],
 ) -> dict[str, float]:
     if len(true_labels) != len(pred_labels):
-        raise ValueError("true_labels and pred_labels must have the same length.")
+        raise ValueError("true_labels와 pred_labels의 길이가 같아야 합니다.")
     if not labels:
         return {"accuracy": accuracy(true_labels, pred_labels), "precision_macro": 0.0, "recall_macro": 0.0, "f1_macro": 0.0}
 

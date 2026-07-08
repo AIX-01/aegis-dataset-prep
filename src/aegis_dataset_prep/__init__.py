@@ -1,4 +1,4 @@
-"""Reusable helpers for the AEGIS dataset-prep notebook."""
+"""AEGIS dataset-prep notebook용 재사용 helper."""
 
 from .config import ExperimentConfig, configure_hf_cache
 from .conversation import INCIDENT_INSTRUCTION, convert_dataset, convert_to_conversation

@@ -17,9 +17,9 @@ class NotebookCleanTests(unittest.TestCase):
             if cell.get("cell_type") != "code":
                 continue
             if cell.get("outputs"):
-                dirty_cells.append(f"cell {index} has outputs")
+                dirty_cells.append(f"cell {index}에 output이 남아 있습니다")
             if cell.get("execution_count") is not None:
-                dirty_cells.append(f"cell {index} has execution_count")
+                dirty_cells.append(f"cell {index}에 execution_count가 남아 있습니다")
 
         self.assertEqual(dirty_cells, [])
 

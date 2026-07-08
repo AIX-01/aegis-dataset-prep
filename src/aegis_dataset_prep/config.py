@@ -1,4 +1,4 @@
-"""Environment-backed experiment configuration."""
+"""환경변수 기반 실험 설정."""
 
 from __future__ import annotations
 
@@ -19,16 +19,15 @@ def _optional_int(env: Mapping[str, str], name: str) -> int | None:
     try:
         return int(value)
     except ValueError as exc:
-        raise ValueError(f"{name} must be an integer.") from exc
+        raise ValueError(f"{name} 값은 정수여야 합니다.") from exc
 
 
 @dataclass(frozen=True)
 class ExperimentConfig:
-    """Runtime settings loaded from environment variables.
+    """환경변수에서 읽는 runtime 설정.
 
-    The dataclass deliberately keeps secret-bearing values out of repr-sensitive
-    workflows in the notebook; pass them to login commands only in a private
-    runtime.
+    secret이 들어갈 수 있는 값은 notebook의 repr 중심 흐름에 직접 노출하지 않고,
+    private runtime에서 login command에만 넘깁니다.
     """
 
     hf_read_token: str = ""
@@ -71,16 +70,16 @@ class ExperimentConfig:
     def validate_supported_values(self) -> None:
         if self.lora_rank is not None and self.lora_rank not in SUPPORTED_LORA_RANKS:
             allowed = ", ".join(str(v) for v in SUPPORTED_LORA_RANKS)
-            raise ValueError(f"LORA_RANK must be one of: {allowed}.")
+            raise ValueError(f"LORA_RANK 값은 다음 중 하나여야 합니다: {allowed}.")
         if self.batch_size is not None and self.batch_size not in SUPPORTED_BATCH_SIZES:
             allowed = ", ".join(str(v) for v in SUPPORTED_BATCH_SIZES)
-            raise ValueError(f"TRAIN_BATCH_SIZE must be one of: {allowed}.")
+            raise ValueError(f"TRAIN_BATCH_SIZE 값은 다음 중 하나여야 합니다: {allowed}.")
 
     def require(self, *field_names: str) -> None:
         missing = [name for name in field_names if not getattr(self, name)]
         if missing:
             joined = ", ".join(missing)
-            raise ValueError(f"Missing required experiment setting(s): {joined}.")
+            raise ValueError(f"필수 실험 설정이 비어 있습니다: {joined}.")
 
     def wandb_init_kwargs(self, learning_rate: float = 5e-5) -> dict:
         kwargs = {
@@ -100,7 +99,7 @@ class ExperimentConfig:
 
 
 def configure_hf_cache(root: str = DEFAULT_HF_CACHE_ROOT) -> dict[str, str]:
-    """Point Hugging Face cache paths at a single runtime-local root."""
+    """Hugging Face cache 경로를 하나의 runtime-local root 아래로 모읍니다."""
 
     paths = {
         "HF_HOME": root,

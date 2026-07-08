@@ -1,4 +1,4 @@
-"""Small pickle helpers used by the notebook."""
+"""Notebook에서 사용하는 작은 pickle helper."""
 
 from __future__ import annotations
 

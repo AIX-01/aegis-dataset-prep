@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "aegis-dataset-prep"
 version = "0.1.0"
-description = "Reusable helpers for the AEGIS dataset preparation notebook."
+description = "AEGIS dataset preparation notebook용 재사용 helper."
 requires-python = ">=3.10"
 
 [tool.setuptools.packages.find]
