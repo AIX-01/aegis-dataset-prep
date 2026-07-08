@@ -1,0 +1,13 @@
+unsloth
+transformers==4.57.1
+trl==0.22.2
+datasets
+huggingface_hub
+wandb
+weave
+scikit-learn
+matplotlib
+seaborn
+pandas
+pillow
+tqdm
